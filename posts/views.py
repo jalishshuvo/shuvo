@@ -1,6 +1,6 @@
 from django.shortcuts import render,get_object_or_404,redirect,reverse
 
-from .models import Post,Author,PostView
+from .models import Post,Author,PostView,Category
 from marketing.models import SignUp
 from django.core.paginator import Paginator,EmptyPage,PageNotAnInteger
 from django.db.models import Count,Q
@@ -25,6 +25,7 @@ def search(request):
        "queryset" : queryset
     }
     return render(request,'search_result.html',context)
+
 def get_category_count():
     queryset = Post\
         .objects\
@@ -32,9 +33,43 @@ def get_category_count():
         .annotate(Count('categories__title'))
     return queryset
 
+def list_of_post_by_category(request,category_slug):
+    categories = Category.objects.all()
+    post = Post.objects.filter(status='published').order_by('-timestamp')
+    if category_slug:
+        categories = get_object_or_404(Category,slug= category_slug)
+        post = post.filter(categories=categories)
+        
+    category_count = get_category_count()
+    
+    latest = Post.objects.filter(status='published').order_by('-timestamp')[0:3]
+    post_list = Post.objects.all()
+    paginator = Paginator(post_list,4)
+    page_request_var = 'page'
+    page = request.GET.get(page_request_var)
+
+    try:
+        paginated_queryset = paginator.page(page)
+    except PageNotAnInteger:
+        paginated_queryset = paginator.page(1)
+    except EmptyPage:
+        paginated_queryset = paginator.page(paginator.num_pages)
+    
+    template = 'list_of_post_by_category.html'
+    context ={
+        'categories' : categories,
+        'post' : post,
+        'category_count' : category_count,
+        'queryset' : paginated_queryset ,
+        'page_request_var' : page_request_var,
+        'latest' : latest
+    }
+    return render(request,template,context)
+
 def index(request):
-    featured = Post.objects.filter(featured=True)
-    latest = Post.objects.order_by('-timestamp')[0:3]
+    
+    featured = Post.objects.filter(featured=True,status='published')[0:3]
+    latest = Post.objects.filter(status='published').order_by('-timestamp')[0:3]
 
     if request.method == "POST":
         email = request.POST["email"]
@@ -47,15 +82,22 @@ def index(request):
         'latest' : latest
     }
     return render(request,'index.html',context)
+def about(request):
+    template='about.html'
+    return render(request,template)
+def privacy(request):
+    template='privacy_policy.html'
+    return render(request,template)
 
 
 
 def blog(request):
+    categories = Category.objects.filter()
     category_count = get_category_count()
     
-    latest = Post.objects.order_by('-timestamp')[0:3]
-    post_list = Post.objects.all()
-    paginator = Paginator(post_list,4)
+    latest = Post.objects.filter(status='published').order_by('-timestamp')[0:3]
+    post_list = Post.objects.filter(status='published').order_by('-timestamp')
+    paginator = Paginator(post_list,6)
     page_request_var = 'page'
     page = request.GET.get(page_request_var)
 
@@ -67,6 +109,7 @@ def blog(request):
         paginated_queryset = paginator.page(paginator.num_pages)
 
     context= {
+        'categories' : categories,
         'category_count' : category_count,
         'queryset' : paginated_queryset ,
         'page_request_var' : page_request_var,
@@ -77,16 +120,16 @@ def blog(request):
 
 
 
-def post_detail(request, id):
+def post_detail(request, slug):
 
-    latest = Post.objects.order_by('-timestamp')[0:3]
+    latest = Post.objects.filter(status='published').order_by('-timestamp')[0:3]
     category_count = get_category_count()
-    most_recent = Post.objects.order_by('-timestamp')[:3]
-    post = get_object_or_404(Post, id=id)
+    most_recent = Post.objects.filter(status='published').order_by('-timestamp')[:3]
+    post = get_object_or_404(Post, slug=slug)
     form = CommentForm(request.POST or None)
 
-    if request.user.is_authenticated:
-        PostView.objects.get_or_create(user=request.user,post=post)
+    # if request.user.is_authenticated:
+    #     PostView.objects.get_or_create(user=request.user,post=post)
 
     if request.method == "POST":
         if form.is_valid():
@@ -94,7 +137,7 @@ def post_detail(request, id):
             form.instance.post = post
             form.save()
             return redirect(reverse("post-detail", kwargs={
-                'id': post.pk
+                'slug': post.slug
             }))
     context = {
         'post': post,
@@ -115,7 +158,7 @@ def post_create(request):
             form.instance.author = author         
             form.save()
             return redirect(reverse("post-detail", kwargs={
-                'id': form.instance.id
+                'slug': form.instance.slug
             }))
 
     context ={
@@ -126,9 +169,9 @@ def post_create(request):
         
     return render(request,'post_create.html',context)
 
-def post_update(request, id):
+def post_update(request, slug):
     title = 'Update'
-    post = get_object_or_404(Post,id=id)
+    post = get_object_or_404(Post,slug=slug)
     form = PostForm(request.POST or None, request.FILES or None,instance= post)
     author = get_author(request.user)
     if request.method == "POST":
@@ -136,7 +179,7 @@ def post_update(request, id):
             form.instance.author = author         
             form.save()
             return redirect(reverse("post-detail", kwargs={
-                'id': form.instance.id
+                'slug': form.instance.slug
             }))
 
     context ={
@@ -146,7 +189,7 @@ def post_update(request, id):
     }
         
     return render(request,'post_create.html',context)
-def post_delete(request, id):
-    post = get_object_or_404(Post, id = id)
+def post_delete(request, slug):
+    post = get_object_or_404(Post, slug = slug)
     post.delete()
     return redirect(reverse('post-list'))

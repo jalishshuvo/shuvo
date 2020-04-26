@@ -19,22 +19,29 @@ from django.urls import path,include
 from django.conf import settings
 from django.conf.urls.static import static
 
-from posts.views import index,blog,post_detail,search,post_create,post_update,post_delete
+from posts.views import (index,blog,post_detail,search,post_create,post_update,
+                        post_delete,list_of_post_by_category,about,privacy)
  
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',index),
+    path('about/',about),
+    path('privacy/',privacy),
     
     path('blog/',blog, name = 'post-list'),
+
     path('search/',search,name='search'),
+
     path('create/',post_create, name = 'post-create'),
-    path('post/<id>/',post_detail, name = 'post-detail'),
-    path('post/<id>/update/', post_update, name='post-update'),
+    path('<slug>/',post_detail, name = 'post-detail'),
+    path('<slug>/update/', post_update,name='post-update' ),
     
-    path('post/<id>/delete/',post_delete, name = 'post-delete'),
+    path('<slug>/delete/',post_delete, name = 'post-delete'),
+
+    path('category/<category_slug>/',list_of_post_by_category,name = 'list_of_post_by_category'),
     path('tinymce/', include('tinymce.urls')),
     path('accounts/', include('allauth.urls')),
+    path('ckeditor/',include('ckeditor_uploader.urls'))
 
 ]
 if settings.DEBUG:

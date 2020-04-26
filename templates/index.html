@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
  {% block content %}
-    
+
     <!-- Hero Section-->
     <section style="background: url({% static 'img/background.jpg' %}); background-size: cover; background-position: center center" class="hero">
       <div class="container">
         <div class="row">
           <div class="col-lg-7">
-            <h1>Python Django Blog - My first blog in Django</h1><a href="#" class="hero-link">Discover More</a>
+            <h1>Health & Fitness Blog</h1><a href="/blog" class="hero-link">Discover More</a>
           </div>
         </div><a href=".intro" class="continue link-scroll"><i class="fa fa-long-arrow-down"></i> Scroll Down</a>
       </div>
@@ -17,8 +17,9 @@
       <div class="container">
         <div class="row">
           <div class="col-lg-8">
-            <h2 class="h3">Some great intro here</h2>
-            <p class="text-big">Place a nice <strong>introduction</strong> here <strong>to catch reader's attention</strong>. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderi.</p>
+            <h2 class="h3"> Health is wealth! </h2>
+            <p class="text-big">Yes, all of us know that pretty well. But, how many can really sense it and take proper care of it? Health and shape is a highly inspiring blog site for maintaining good health and shape. It helps people to feel the true essence of a healthy life. 
+            </p>
           </div>
         </div>
       </div>
@@ -26,6 +27,8 @@
     
     <section class="featured-posts no-padding-top">
       <div class="container">
+    
+    
         <!-- Post-->
 
         {% for obj in object_list %}
@@ -41,10 +44,11 @@
                 <header class="post-header">
 
                   <div class="category">
+                  
                     {% for cat in obj.categories.all %}
                     <a href="#">{{ cat }}</a>
                     {% endfor %}
-                  </div><a href="post.html">
+                  </div><a href="{{ obj.get_absolute_url }}">
                     <h2 class="h4"> {{ obj.title }} </h2></a>
                 </header>
                 <p> {{ obj.overview }} </p>
@@ -69,8 +73,10 @@
     <section style="background: url({% static 'img/divider-bg.jpg' %}); background-size: cover; background-position: center bottom" class="divider">
       <div class="container">
         <div class="row">
-          <div class="col-md-7">
-            <h2>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua</h2><a href="#" class="hero-link">View More</a>
+          <div class="col-md-10">
+            <h2>If you have good health, make sure it has a good shape as well to present yourself everywhere confidently.
+             This is not so easy. That’s why we are here to deliver the concrete information and help people to get what they are searching for. 
+             </h2><a href="/blog" class="hero-link">View More</a>
           </div>
         </div>
       </div>
@@ -80,7 +86,7 @@
       <div class="container">
         <header> 
           <h2>Latest from the blog</h2>
-          <p class="text-big">Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+          <p class="text-big"></p>
         </header>
         <div class="row">
 
@@ -96,7 +102,7 @@
                 <a href="#"> {{ cat }} </a>
                 {% endfor %}
                 </div>
-              </div><a href="#">
+              </div><a href="{{ obj.get_absolute_url }}">
                 <h3 class="h4"> {{ obj.title }} </h3></a>
               <p class="text-muted"> {{ obj.overview }} </p>
             </div>
@@ -112,7 +118,7 @@
         <div class="row">
           <div class="col-md-6">
             <h2>Subscribe to Newsletter</h2>
-            <p class="text-big">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+            <p class="text-big">Get the latest Fitness tips first</p>
           </div>
           <div class="col-md-8">
             <div class="form-holder">
@@ -129,7 +135,7 @@
       </div>
     </section>
     <!-- Gallery Section-->
-    <section class="gallery no-padding">    
+    {% comment %} <section class="gallery no-padding">    
       <div class="row">
         <div class="mix col-lg-3 col-md-3 col-sm-6">
           <div class="item"><a href="img/gallery-1.jpg" data-fancybox="gallery" class="image"><img src="{% static 'img/gallery-1.jpg' %}" alt="..." class="img-fluid">
@@ -148,5 +154,5 @@
               <div class="overlay d-flex align-items-center justify-content-center"><i class="icon-search"></i></div></a></div>
         </div>
       </div>
-    </section>
+    </section> {% endcomment %}
   {% endblock %}

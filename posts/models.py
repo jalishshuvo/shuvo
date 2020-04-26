@@ -2,6 +2,10 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from tinymce.models import HTMLField
+from sorl.thumbnail import ImageField
+from django.utils import timezone
+#from ckeditor.fields import RichTextField
+from ckeditor_uploader.fields import RichTextUploadingField
 
 # Create your models here.
 
@@ -15,8 +19,20 @@ class Author(models.Model):
         return self.user.username
 
 class Category(models.Model):
-    title = models.CharField(max_length=20)
+    title = models.CharField(max_length=20,unique=True)
+    slug = models.SlugField(max_length =20,unique=True)
 
+    class Meta:
+        ordering = ('title',)
+        verbose_name = 'category'
+        verbose_name_plural ='categories'
+    def get_absolute_url(self):
+        return reverse('list_of_post_by_category',kwargs={
+            'slug': self.slug
+        })
+        
+        # args=[self.slug])
+            
     def __str__(self):
         return self.title
 
@@ -32,16 +48,25 @@ class Comment(models.Model):
 
 
 class Post(models.Model):
+    STATUS_CHOIICES =(
+        ('draft','Draft'),
+        ('published','Published')
+    )
     title = models.CharField(max_length=250)
-    overview =models.TextField()
+    overview =models.TextField(max_length=250)
+    published = models.DateTimeField(default=timezone.now)
     timestamp = models.DateTimeField(auto_now_add = True)
-    content = HTMLField()
+    updated = models.DateTimeField(auto_now=True)
+    status = models.CharField(max_length=9,choices=STATUS_CHOIICES,default='draft')
+    #content = HTMLField(blank=True,null=True)
+    contents = RichTextUploadingField(blank=True,null=True)
     comment_count = models.IntegerField(default=0)
-    # view_count = models.IntegerField(default=0)
+    view_count = models.IntegerField(default=0)
     author = models.ForeignKey(Author,on_delete=models.CASCADE)
     thumbnail = models.ImageField()
     categories = models.ManyToManyField(Category)
     featured = models.BooleanField()
+    slug = models.SlugField(max_length=250,unique=True)
     previous_post = models.ForeignKey(
         'self',related_name='previous',on_delete=models.SET_NULL,blank=True,null=True)
     next_post = models.ForeignKey(
@@ -52,24 +77,27 @@ class Post(models.Model):
 
     def get_absolute_url(self):
         return reverse('post-detail',kwargs={
-            'id': self.id
+            'slug': self.slug
         })
+        
     def get_update_url(self):
         return reverse('post-update',kwargs={
-            'id': self.id
+            'slug': self.slug
         })
+        
     def get_delete_url(self):
         return reverse('post-delete',kwargs={
-            'id': self.id
+            'slug': self.slug
         })
+        
 
     @property
     def get_comments(self):
         return self.comments.all().order_by('-timestamp')
     
-    @property
-    def view_count(self):
-        return PostView.objects.filter(post=self).count()
+    # @property
+    # def view_count(self):
+    #     return PostView.objects.filter(post=self).count()
 
     @property
     def comment_count(self):

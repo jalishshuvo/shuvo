@@ -1,5 +1,6 @@
 
    {% extends 'base.html' %}
+   {% load thumbnail %}
    {% load static %}
     {% block content %}
     <style>
@@ -13,7 +14,8 @@
         <main class="post blog-post col-lg-8"> 
           <div class="container">
             <div class="post-single">
-              <div class="post-thumbnail"><img src="{{ post.thumbnail.url }}" alt="..." class="img-fluid"></div>
+            
+              <div class="post-thumbnail"><img src="{{ post.thumbnail.url }}" alt="..." class="img-fluid"> </div>
               <div class="post-details">
                 <div class="post-meta d-flex justify-content-between">
                   <div class="category">
@@ -21,10 +23,12 @@
                   <a href="#">{{ cat }}</a>
                   {% endfor %}
                   </div>
+                  {% if request.user.is_authenticated %}
                   <div>
-                    <a href="{% url 'post-update' id=post.id %}">Update</a>
-                    <a href="{% url 'post-delete' id=post.id %}">Delete</a>
-                  </div>
+                    <a class="btn btn-primary" href="{% url 'post-update' slug=post.slug %}">Update</a>
+                    <a class="btn btn-primary"  href="{% url 'post-delete' slug=post.slug %}">Delete</a>
+                  </div> 
+                  {% endif %}
                 </div>
                 <h1>{{ post.title }}<a href="{{ post.get_absolute_url }}"><i class="fa fa-bookmark-o"></i></a></h1>
                 <div class="post-footer d-flex align-items-center flex-column flex-sm-row"><a href="#" class="author d-flex align-items-center flex-wrap">
@@ -37,7 +41,8 @@
                   </div>
                 </div>
                 <div class="post-body">
-                {{ post.content|safe }}
+                
+                {{ post.contents|safe }}
                 </div>
                 <div class="posts-nav d-flex justify-content-between align-items-stretch flex-column flex-md-row">
                   {% if post.previous_post %}
@@ -103,7 +108,7 @@
                 </div>
                 {% else%}
                 <a class="btn btn-primary" href="{% url 'account_login' %}"> Loging to Comment</a>
-                {% endif %}
+                {% endif %} 
               </div>
             </div>
           </div>
