@@ -46,7 +46,7 @@ dask==2.5.2
 decorator==4.4.0
 defusedxml==0.6.0
 distlib==0.3.0
-distributed==2.5.2
+distributed==2021.10.0
 Django==3.0
 django-allauth==0.41.0
 django-atom==0.16.3
